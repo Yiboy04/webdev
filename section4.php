@@ -6,13 +6,27 @@ if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit();
 }
+
+// Define the file where electronics items are stored
+$filename = 'other_items.txt';
+
+// Function to read the items from the file
+function readItemsFromFile($filename) {
+    if (file_exists($filename)) {
+        return file($filename, FILE_IGNORE_NEW_LINES);
+    }
+    return [];
+}
+
+// Read the items to display them
+$items = readItemsFromFile($filename);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Main Page</title>
+    <title>Section 2</title>
     <style>
         body {
             font-family: Arial, sans-serif; /* Ensure font consistency */
@@ -30,62 +44,52 @@ if (!isset($_SESSION['username'])) {
             text-align: center; /* Center text inside links */
             padding: 14px 16px; /* Padding inside each link */
             text-decoration: none; /* Remove underline from links */
-            font-size: 30px;
+            font-size: 25px;
         }
         .navbar a:hover {
             background-color: #ddd; /* Light background on hover */
             color: black; /* Dark text on hover */
         }
         h2 {
+            background-color: red;
+            height: 10vh; 
             color: black;
             display: flex;
-            font-size: 36px;
+            font-size: 50px;
             text-align: left;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        h2 img {
-            height: 60%;
-            margin-left: 20px;
-        }
-        .center-text {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 40vh;
-            font-size: 26px;
-        }
-        .center-text p {
-            font-family: 'Georgia', serif;
-        }
-        .center-text img {
-            margin-top: 10px;
-            height: 300px;
-            width: auto;
+        p {
+            font-size: 50px;
         }
     </style>
 </head>
 <body>
-    <div class="navbar">
+<div class="navbar">
         <a href="section1.php">Electronics</a>
         <a href="section2.php">Water Bottles</a>
         <a href="section3.php">Stationary</a>
-        <a href="section4.php">Others</a>
+        <a href="main.php">Back to Main Page</a>
         <a href="about.php">About</a>
         <a href="logout.php">Logout</a>
     </div>
+    <h2>Others</h2>
+    <p>This is the others section of the website.</p>
 
-    <h2>
-        Welcome Students, This is the main page.
-        <img src="img/inti_logo.png" alt="Inti Logo">
-    </h2>
+    <!-- Display the added items -->
+<div class="item-list">
+    <h3>Available Others Items</h3>
+    <ul>
+        <?php if (!empty($items)): ?>
+            <?php foreach ($items as $item): ?>
+                <li><?php echo htmlspecialchars($item); ?></li>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <li>No items available.</li>
+        <?php endif; ?>
+    </ul>
+</div>
 
-    <div class="center-text">
-        <p>The website where you find your lost item in INTI Penang.</p>
-        <img src="img/inti.jpg" alt="Inti">
-    </div>
 </body>
 </html>

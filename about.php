@@ -12,7 +12,7 @@ if (!isset($_SESSION['username'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Main Page</title>
+    <title>Section 2</title>
     <style>
         body {
             font-family: Arial, sans-serif; /* Ensure font consistency */
@@ -30,62 +30,48 @@ if (!isset($_SESSION['username'])) {
             text-align: center; /* Center text inside links */
             padding: 14px 16px; /* Padding inside each link */
             text-decoration: none; /* Remove underline from links */
-            font-size: 30px;
+            font-size: 25px;
         }
         .navbar a:hover {
             background-color: #ddd; /* Light background on hover */
             color: black; /* Dark text on hover */
         }
         h2 {
+            background-color: white;
+            height: 10vh; 
             color: black;
             display: flex;
-            font-size: 36px;
+            font-size: 50px;
             text-align: left;
+            margin: 0;
+            padding: 0;
             justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            box-sizing: border-box;
         }
         h2 img {
-            height: 60%;
-            margin-left: 20px;
-        }
-        .center-text {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 40vh;
-            font-size: 26px;
-        }
-        .center-text p {
-            font-family: 'Georgia', serif;
-        }
-        .center-text img {
-            margin-top: 10px;
-            height: 300px;
-            width: auto;
+            height: 60%; /* Adjust image height to fit within header */
+            margin-left: 20px; /* Add space between the text and image */
         }
     </style>
 </head>
 <body>
-    <div class="navbar">
+<div class="navbar">
         <a href="section1.php">Electronics</a>
         <a href="section2.php">Water Bottles</a>
         <a href="section3.php">Stationary</a>
         <a href="section4.php">Others</a>
-        <a href="about.php">About</a>
+        <a href="main.php">Back to Main Page</a>
         <a href="logout.php">Logout</a>
     </div>
-
     <h2>
-        Welcome Students, This is the main page.
+        About
         <img src="img/inti_logo.png" alt="Inti Logo">
     </h2>
-
-    <div class="center-text">
-        <p>The website where you find your lost item in INTI Penang.</p>
-        <img src="img/inti.jpg" alt="Inti">
-    </div>
+    <p>Everyday there's like a few items that scattered around inti waiting to be found by their owner. The problem is </p>
+    <p>that they often don't know where to find them or where they lost it. So we're making a website for inti student </p>
+    <p>to help student to find their lost item more easily. Not only that, this website also can track who claim the</p>
+    <p>lost item as there will be a report in detail about the person. Moreover, if the owner not sure is it his or her</p>
+    <p>own item, there will be a detail description of where it's found, when it's found and some detail on the item. </p>
+    <a href="main.php">Back to Main Page</a> |
+    <a href="logout.php">Logout</a>
 </body>
 </html>
