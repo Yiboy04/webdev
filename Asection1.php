@@ -50,18 +50,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Insert or update item in the database
-        if (isset($_POST['edit_item'])) {
-            $item_id = (int)$_POST['item_id'];
-            $query = "UPDATE item SET Item_Name = ?, Item_Date = ?, Item_Time = ?, Item_Description = ?, Item_Photo = ? WHERE Item_ID = ?";
-            $stmt = $conn->prepare($query);
-            $stmt->bind_param("sssssi", $item_name, $item_date, $item_time, $item_description, $item_photo, $item_id);
-            $stmt->execute();
-        } else {
+        if (isset($_POST['add_item'])) {
+            // Add a new item
             $query = "INSERT INTO item (Item_Name, Item_Date, Item_Time, Item_Description, Item_Photo, Category_ID) VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("sssssi", $item_name, $item_date, $item_time, $item_description, $item_photo, $category_id);
-            $stmt->execute();
+            if ($stmt->execute()) {
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            } else {
+                echo "Failed to add item: " . $stmt->error;
+            }
+        } elseif (isset($_POST['edit_item'])) {
+            // Update an existing item
+            $item_id = (int)$_POST['item_id'];
+            if (empty($item_photo)) {
+                $query = "UPDATE item SET Item_Name = ?, Item_Date = ?, Item_Time = ?, Item_Description = ? WHERE Item_ID = ?";
+                $stmt = $conn->prepare($query);
+                $stmt->bind_param("ssssi", $item_name, $item_date, $item_time, $item_description, $item_id);
+            } else {
+                $query = "UPDATE item SET Item_Name = ?, Item_Date = ?, Item_Time = ?, Item_Description = ?, Item_Photo = ? WHERE Item_ID = ?";
+                $stmt = $conn->prepare($query);
+                $stmt->bind_param("sssssi", $item_name, $item_date, $item_time, $item_description, $item_photo, $item_id);
+            }
+            if ($stmt->execute()) {
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            } else {
+                echo "Failed to update item: " . $stmt->error;
+            }
         }
+        
+        
+        
+        
 
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
@@ -90,16 +112,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Electronics Section</title>
     <style>
-        /* Page styling */
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+       /* Page styling */
+       body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
         .navbar { overflow: hidden; background-color: #333; }
         .navbar a { float: left; display: block; color: #f2f2f2; text-align: center; padding: 14px 16px; text-decoration: none; font-size: 25px; }
         .navbar a:hover { background-color: #ddd; color: black; }
         h2 { background-color: #ddd; color: black; font-size: 50px; padding: 10px; margin: 0; }
-        .item-list { margin: 20px; font-size: 18px; }
-        .item { margin-bottom: 15px; }
-        .item img { width: 100px; height: 100px; display: block; margin-top: 10px; }
-        .edit-btn, .delete-btn, .report-btn, .view-report-btn { color: blue; text-decoration: none; margin-right: 10px; cursor: pointer; }
+        .item-detail { border: 1px solid #ddd; border-radius: 8px; margin: 20px 0; padding: 20px; background-color: #f9f9f9; display: flex; flex-wrap: wrap; }
+        .item-header { width: 100%; margin-bottom: 15px; }
+        .item-header h3 { font-size: 24px; color: #333; }
+        .item-header .item-category { font-size: 14px; color: #666; }
+        .item-content { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; }
+        .item-image img { width: 150px; height: 150px; border-radius: 8px; object-fit: cover; border: 1px solid #ccc; }
+        .item-info { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .item-info p { margin: 0; font-size: 16px; color: #444; }
+        .item-actions { margin-top: 15px; width: 100%; }
+        .item-actions a { color: #007bff; text-decoration: none; margin-right: 15px; font-size: 16px; }
+        .item-actions a:hover { text-decoration: underline; }
 
         /* Modal styling */
         .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); }
@@ -124,23 +153,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="item-list">
     <h3>Added Items</h3>
-    <ul>
-        <?php while ($item = $items->fetch_assoc()): ?>
-            <li class="item">
-                <strong>Item:</strong> <?= htmlspecialchars($item['Item_Name']) ?><br>
-                <strong>Date:</strong> <?= htmlspecialchars($item['Item_Date']) ?><br>
-                <strong>Time:</strong> <?= htmlspecialchars($item['Item_Time']) ?><br>
-                <strong>Description:</strong> <?= htmlspecialchars($item['Item_Description']) ?><br>
-                <?php if (!empty($item['Item_Photo'])): ?>
-                    <img src="<?= htmlspecialchars($item['Item_Photo']) ?>" alt="Item Photo">
-                <?php endif; ?>
+    <?php while ($item = $items->fetch_assoc()): ?>
+        <div class="item-detail">
+            <!-- Item Header -->
+            <div class="item-header">
+                <h3>Item Name: <span class="item-name"><?= htmlspecialchars($item['Item_Name']) ?></span></h3>
+                <p class="item-category">Category: Electronics</p>
+            </div>
+
+            <!-- Item Content -->
+            <div class="item-content">
+                <div class="item-image">
+                    <?php if (!empty($item['Item_Photo'])): ?>
+                        <img src="<?= htmlspecialchars($item['Item_Photo']) ?>" alt="<?= htmlspecialchars($item['Item_Name']) ?>">
+                    <?php else: ?>
+                        <img src="default-item.png" alt="No Image Available">
+                    <?php endif; ?>
+                </div>
+                <div class="item-info">
+                    <p><strong>Date Added:</strong> <?= htmlspecialchars($item['Item_Date']) ?></p>
+                    <p><strong>Time Added:</strong> <?= htmlspecialchars($item['Item_Time']) ?></p>
+                    <p><strong>Description:</strong> <?= htmlspecialchars($item['Item_Description']) ?></p>
+                </div>
+            </div>
+
+            <!-- Item Actions -->
+            <div class="item-actions">
                 <a class="edit-btn" href="#" onclick="openEditModal(<?= $item['Item_ID'] ?>)">[Edit]</a>
                 <a class="delete-btn" href="?delete=<?= $item['Item_ID'] ?>" onclick="return confirm('Are you sure you want to delete this item?');">[Delete]</a>
                 <a class="report-btn" href="#" onclick="openReportModal(<?= $item['Item_ID'] ?>)">[Report]</a>
                 <a class="view-report-btn" href="#" onclick="openViewReportModal(<?= $item['Item_ID'] ?>)">[View Report]</a>
-            </li>
-        <?php endwhile; ?>
-    </ul>
+            </div>
+        </div>
+    <?php endwhile; ?>
 </div>
 
 <!-- Modals for Add, Edit, Report, and View Reports -->
@@ -149,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <span class="close" onclick="closeModal('itemModal')">&times;</span>
         <h2 id="modalTitle">Add New Item</h2>
         <form id="itemForm" method="post" action="" enctype="multipart/form-data">
-            <input type="hidden" id="editIndex" name="index">
+            <input type="hidden" id="item_id" name="item_id">
             <label for="item_name">Item Name:</label>
             <input type="text" id="item_name" name="item_name" required>
             <br><br>
@@ -217,20 +262,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function openAddModal() {
-        document.getElementById("itemModal").style.display = "block";
-        document.getElementById("modalTitle").innerText = "Add New Item";
-        document.getElementById("addItemBtn").style.display = "inline";
-        document.getElementById("editItemBtn").style.display = "none";
-        document.getElementById("itemForm").reset();
-    }
+    document.getElementById("itemModal").style.display = "block";
+    document.getElementById("modalTitle").innerText = "Add New Item";
+    document.getElementById("addItemBtn").style.display = "inline";
+    document.getElementById("editItemBtn").style.display = "none";
+    document.getElementById("itemForm").reset();
+    document.getElementById("editIndex").value = ""; // Reset the hidden field for editing
+ }
+
 
     function openEditModal(itemId) {
-        document.getElementById("itemModal").style.display = "block";
-        document.getElementById("modalTitle").innerText = "Edit Item";
-        document.getElementById("addItemBtn").style.display = "none";
-        document.getElementById("editItemBtn").style.display = "inline";
-        document.getElementById("editIndex").value = itemId;
-    }
+    // Reset the form
+    document.getElementById("itemForm").reset();
+
+    // Set modal title
+    document.getElementById("modalTitle").innerText = "Edit Item";
+
+    // Toggle buttons
+    document.getElementById("addItemBtn").style.display = "none";
+    document.getElementById("editItemBtn").style.display = "inline";
+
+    // Fetch item details via AJAX
+    $.ajax({
+        url: "fetch_item.php", // A PHP script to fetch item details
+        type: "POST",
+        data: { item_id: itemId },
+        dataType: "json",
+        success: function(data) {
+            if (data) {
+                // Populate the form fields with the item data
+                document.getElementById("item_id").value = data.Item_ID; // Hidden field
+                document.getElementById("item_name").value = data.Item_Name;
+                document.getElementById("item_date").value = data.Item_Date;
+                document.getElementById("item_time").value = data.Item_Time;
+                document.getElementById("item_description").value = data.Item_Description;
+            }
+        },
+        error: function() {
+            alert("Failed to load item details.");
+        }
+    });
+
+    // Show the modal
+    document.getElementById("itemModal").style.display = "block";
+}
+
 
     function openReportModal(itemId) {
         document.getElementById("reportModal").style.display = "block";
