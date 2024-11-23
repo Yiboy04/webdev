@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="main.php">Back to Main Page</a>
     <a href="section3.php">Stationary</a>
     <a href="section4.php">Others</a>
-    <a href=".php">Logout</a>
+    <a href="logout.php">Logout</a>
     <a href="#" onclick="openAddModal()">Add New Item</a>
 </div>
 
